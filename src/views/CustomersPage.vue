@@ -1,13 +1,14 @@
 <script setup>
+import { ref } from "vue";
 import { useCustomerStore } from "../stores/customers";
 import TableComponent from "../components/TableComponent.vue";
+import ModalComponent from "../components/ModalComponent.vue";
 
 const customers = useCustomerStore();
 customers.getAllCustomers();
 
-function getAllCustomers() {
-  customers.getAllCustomers();
-}
+let showModal = ref(false);
+let modalId = ref(0);
 
 function showFilteredCustomers(status) {
   customers.showAllCustomersByStatus(status);
@@ -22,7 +23,19 @@ function clearFilters() {
 }
 
 function showDeleteModal(id) {
-  console.log(id);
+  showModal.value = true;
+  modalId.value = id;
+}
+
+function hideDeleteModal() {
+  showModal.value = false;
+  modalId.value = 0;
+}
+
+function deleteCustomer(id) {
+  customers.removeCustomer(id);
+  showModal.value = false;
+  modalId.value = 0;
 }
 </script>
 
@@ -42,5 +55,11 @@ function showDeleteModal(id) {
       @delete="showDeleteModal"
     ></TableComponent>
     <!-- <button @click="getAllCustomers">Reset table content</button> -->
+    <ModalComponent
+      v-if="showModal"
+      :id="modalId"
+      @confirm="deleteCustomer"
+      @decline="hideDeleteModal"
+    ></ModalComponent>
   </div>
 </template>
