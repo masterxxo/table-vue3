@@ -4,7 +4,7 @@ const props = defineProps({
   tableData: Array,
 });
 
-let sortType = ref("desc");
+let sortType = ref(1);
 
 const emits = defineEmits(["filter", "sort", "delete"]);
 
@@ -13,12 +13,27 @@ function setFilter(status) {
 }
 
 function setSort() {
-  if (sortType.value === "desc") {
-    sortType.value = "asc";
-  } else {
-    sortType.value = "desc";
+  let sortName = "";
+
+  switch (sortType.value) {
+    case 1:
+      sortName = "desc";
+      sortType.value++;
+      break;
+    case 2:
+      sortName = "asc";
+      sortType.value++;
+      break;
+    case 3:
+      sortName = "none";
+      sortType.value = 1;
+      break;
+    default:
+      sortName = "none";
+      break;
   }
-  emits("sort", sortType.value);
+
+  emits("sort", sortName);
 }
 
 function deleteAction(id) {

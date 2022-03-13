@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useCustomerStore } from "../stores/customers";
 import TableComponent from "../components/TableComponent.vue";
 import ModalComponent from "../components/ModalComponent.vue";
@@ -9,17 +9,56 @@ customers.getAllCustomers();
 
 let showModal = ref(false);
 let modalId = ref(0);
+let allCustomers = ref([]);
+
+onMounted(() => {
+  allCustomers.value = customers.customers;
+});
 
 function showFilteredCustomers(status) {
-  customers.showAllCustomersByStatus(status);
+  allCustomers.value = customers.getFilteredCustomersByStatus(status);
 }
 
 function showSortedCustomers(type) {
-  customers.sortAllCustomersByName(type);
+  if (type === "none") {
+    resetSort();
+  } else {
+    sortValues(type);
+  }
+}
+
+function sortValues(type) {
+  allCustomers.value = allCustomers.value.sort((a, b) => {
+    const lowerCaseA = a.name.toLowerCase();
+    const lowerCaseB = b.name.toLowerCase();
+    if (lowerCaseA < lowerCaseB) {
+      return type === "asc" ? 1 : -1;
+    }
+
+    if (lowerCaseA > lowerCaseB) {
+      return type === "asc" ? -1 : 1;
+    }
+
+    return 0;
+  });
+}
+
+function resetSort() {
+  allCustomers.value = allCustomers.value.sort((a, b) => {
+    if (a.id < b.id) {
+      return -1;
+    }
+
+    if (a.id > b.id) {
+      return 1;
+    }
+
+    return 0;
+  });
 }
 
 function clearFilters() {
-  customers.getAllCustomers();
+  allCustomers.value = customers.customers;
 }
 
 function showDeleteModal(id) {
@@ -34,6 +73,7 @@ function hideDeleteModal() {
 
 function deleteCustomer(id) {
   customers.removeCustomer(id);
+  allCustomers.value = customers.customers;
   showModal.value = false;
   modalId.value = 0;
 }
@@ -49,12 +89,11 @@ function deleteCustomer(id) {
       Clear Filters
     </button>
     <TableComponent
-      :tableData="customers.customers"
+      :tableData="allCustomers"
       @filter="showFilteredCustomers"
       @sort="showSortedCustomers"
       @delete="showDeleteModal"
     ></TableComponent>
-    <!-- <button @click="getAllCustomers">Reset table content</button> -->
     <ModalComponent
       v-if="showModal"
       :id="modalId"

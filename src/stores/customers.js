@@ -5,28 +5,13 @@ export const useCustomerStore = defineStore({
   state: () => ({
     customers: [],
   }),
-  getters: {},
+  getters: {
+    getFilteredCustomersByStatus: (state) => {
+      return (status) =>
+        state.customers.filter((customer) => customer.status === status);
+    },
+  },
   actions: {
-    sortAllCustomersByName(type) {
-      this.customers = this.customers.sort((a, b) => {
-        const lowerCaseA = a.name.toLowerCase();
-        const lowerCaseB = b.name.toLowerCase();
-        if (lowerCaseA < lowerCaseB) {
-          return type === "asc" ? 1 : -1;
-        }
-
-        if (lowerCaseA > lowerCaseB) {
-          return type === "asc" ? -1 : 1;
-        }
-
-        return 0;
-      });
-    },
-    showAllCustomersByStatus(status) {
-      this.customers = this.customers.filter(
-        (customer) => customer.status === status
-      );
-    },
     removeCustomer(id) {
       this.customers = this.customers.filter((customer) => customer.id !== id);
     },
